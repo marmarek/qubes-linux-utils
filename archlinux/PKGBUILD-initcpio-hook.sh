@@ -44,6 +44,21 @@ EOF
 
 	    echo "0 `cat /sys/block/xvda/size` snapshot /dev/xvda /dev/xvdc2 N 16" | \
 		dmsetup --noudevsync create dmroot || die "Qubes: FATAL: cannot create dmroot!"
+           echo "Qubes: done."
+       else
+           echo "Qubes: Doing R/W setup for TemplateVM..."
+           while ! [ -e /dev/xvdc ]; do sleep 0.1; done
+           sfdisk -q --unit S /dev/xvdc >/dev/null <<EOF
+1,$SWAP_SIZE,S
+EOF
+           if [ $? -ne 0 ]; then
+               die "Qubes: failed to setup partitions on volatile device"
+           fi
+           while ! [ -e /dev/xvdc1 ]; do sleep 0.1; done
+           mkswap /dev/xvdc1
+           echo "0 `cat /sys/block/xvda/size` linear /dev/xvda 0" | \
+               dmsetup --noudevsync create dmroot || die "Qubes: FATAL: cannot create dmroot!"
+           echo "Qubes: done."
 	fi
 
 	dmsetup mknodes dmroot

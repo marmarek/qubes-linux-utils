@@ -4,6 +4,14 @@ run_earlyhook() {
 
 	msg "Starting Qubes copy on write setup script"
 
+	die() {
+	    echo "$@"
+	    exit 1
+	}
+	warning() {
+	    echo "WARNING: $@"
+	}
+
 	if ! grep -q 'root=[^ ]*dmroot' /proc/cmdline; then
 	    warning "Qubes: dmroot not requested, probably not a Qubes VM"
 	    exit 0
